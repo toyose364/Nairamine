@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naira Mine Gold</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background: #0a0c0f; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; }
+        .app-container { max-width: 1280px; width: 100%; }
+        .gold-card {
+            background: #1a1f28; border-radius: 32px; box-shadow: 0 20px 40px #000000cc, 0 1px 3px #f5c542 inset, 0 0 30px #ffd96630;
+            padding: 28px 24px; border: 1px solid #e4aa33; backdrop-filter: blur(2px);
+        }
+        h1, h2 { color: #fad675; font-weight: 400; letter-spacing: 2px; border-left: 8px solid #ffd966; padding-left: 22px; margin: 20px 0 25px; text-transform: uppercase; text-shadow: 0 0 6px #ffbf00; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; margin-bottom: 30px; }
+        .stat-box { background: #10141c; border-radius: 28px; padding: 22px 10px; text-align: center; border: 1px solid #cbb26a; box-shadow: 0 8px 0 #2a2418; }
+        .stat-label { color: #b9a06b; font-size: 0.9rem; text-transform: uppercase; }
+        .stat-value { font-size: 2.6rem; font-weight: 600; color: #ffdf9e; line-height: 1.2; text-shadow: 0 0 12px #ffae00; }
+        .miner-row { display: flex; align-items: center; justify-content: space-between; background: #0f141c; border-radius: 48px; padding: 18px 28px; margin-bottom: 35px; border: 1px solid #e4b152; flex-wrap: wrap; }
+        button { background: linear-gradient(145deg, #ffdb8e, #e4a631); border: none; border-radius: 60px; padding: 16px 38px; font-size: 1.2rem; font-weight: 700; color: #101010; text-transform: uppercase; box-shadow: 0 8px 0 #7a571d, 0 6px 25px #f5b81b; cursor: pointer; transition: 0.1s; border: 1px solid #ffdcaa; letter-spacing: 1.5px; }
+        button:active { transform: translateY(6px); box-shadow: 0 2px 0 #7a571d, 0 8px 20px #f5c542; }
+        button:disabled { opacity: 0.4; transform: translateY(4px); box-shadow: 0 4px 0 #5f4a20; pointer-events: none; }
+        .timer-box { background: #000408; border-radius: 60px; padding: 14px 40px; font-size: 2.5rem; font-family: monospace; letter-spacing: 10px; color: #f5c542; border: 2px solid #f5c542; box-shadow: 0 0 24px #ffd966; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+        .panel { background: #131a24; border-radius: 32px; padding: 22px; border: 1px solid #bd9d4e; }
+        .ref-link-box { background: #0a0f17; border-radius: 50px; padding: 14px 20px; display: flex; border: 1px solid #f5c542; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .ref-link-text { background: #1e2633; border-radius: 60px; padding: 10px 20px; flex: 1; color: #ffd966; font-weight: 500; word-break: break-all; }
+        .copy-btn { background: #e4b152; border: none; border-radius: 40px; padding: 10px 22px; font-weight: bold; box-shadow: 0 4px 0 #7a571d; cursor: pointer; }
+        .withdraw-form input { background: #0f151f; border: 2px solid #7b6e48; border-radius: 60px; padding: 16px 22px; width: 100%; margin-bottom: 16px; color: #fad87a; font-size: 1rem; outline: none; }
+        .withdraw-form input:focus { border-color: #f5c542; box-shadow: 0 0 18px #f5c542; }
+        .process-btn { width: 100%; background: linear-gradient(145deg, #ffe49e, #c9a135); color: #111; font-size: 1.2rem; }
+        .leaderboard-table { width: 100%; border-collapse: collapse; font-size: 1.2rem; }
+        .leaderboard-table th { color: #fad46c; border-bottom: 2px solid #b4944b; padding: 12px 5px; text-align: left; }
+        .leaderboard-table td { padding: 12px 5px; border-bottom: 1px solid #4f4a33; color: #efdba8; }
+        .error-banner { background: #ac2f2f; color: #ffdbaa; padding: 16px 30px; border-radius: 60px; font-weight: bold; margin-bottom: 25px; border: 2px solid #ffae42; display: flex; gap: 12px; align-items: center; }
+        .footer { color: #6a5e40; text-align: center; margin-top: 30px; }
+        .login-container, .signup-container { background: #0f141e; border-radius: 48px; padding: 40px; max-width: 480px; margin: 0 auto 30px; border: 2px solid #dbaa44; text-align: center; }
+        .login-container input, .signup-container input { background: #1e2633; border: 2px solid #ad8d47; border-radius: 60px; padding: 16px 24px; width: 100%; margin-bottom: 18px; color: #f5d987; font-size: 1.1rem; }
+        .switch-link { color: #e4b95b; margin-top: 22px; cursor: pointer; text-decoration: underline; }
+        .hidden { display: none; }
+        hr { border: 1px solid #c6a44d40; margin: 20px 0; }
+        .withdraw-hint { color: #e4b95b; margin: 8px 0; font-size: 0.95rem; }
+        .error-text { color: #ff7b7b; }
+    </style>
+</head>
+<body>
+<div class="app-container" id="app">
+    <!-- offline banner dynamically injected -->
+    <div id="offlineWarning"></div>
+
+    <!-- AUTH VIEW (SIGN UP / LOGIN) -->
+    <div id="authView" class="gold-card">
+        <div style="text-align: center; margin-bottom: 24px;"><span style="font-size: 3rem;">⚱️</span></div>
+        <div id="loginPanel" class="login-container">
+            <h2 style="border-left: none; text-align: center;">LOGIN</h2>
+            <input type="tel" id="loginPhone" placeholder="Mobile number (e.g. 08001234567)" value="08012345678">
+            <input type="password" id="loginPassword" placeholder="8-digit password" maxlength="8" value="12345678">
+            <button id="loginBtn">SIGN IN</button>
+            <div class="switch-link" id="goToSignup">Don't have an account? Sign up</div>
+        </div>
+        <div id="signupPanel" class="signup-container hidden">
+            <h2 style="border-left: none;">SIGN UP</h2>
+            <input type="tel" id="signupPhone" placeholder="Mobile number" value="08098765432">
+            <input type="password" id="signupPassword" placeholder="8-digit password" maxlength="8" value="12345678">
+            <button id="signupBtn">CREATE ACCOUNT</button>
+            <div class="switch-link" id="goToLogin">Already have an account? Log in</div>
+        </div>
+    </div>
+
+    <!-- MAIN APP (visible only after login) -->
+    <div id="mainApp" class="gold-card hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h1 style="margin:0;">⚱️ NAIRA MINE</h1>
+            <button id="logoutBtn" style="padding: 10px 22px; font-size: 1rem;">LOGOUT</button>
+        </div>
+
+        <!-- dashboard grid -->
+        <div class="stats-grid">
+            <div class="stat-box"><div class="stat-label">⛏️ MINED GOLD</div><div class="stat-value" id="goldDisplay">0</div></div>
+            <div class="stat-box"><div class="stat-label">💰 NAIRA (₦)</div><div class="stat-value" id="nairaDisplay">0</div></div>
+            <div class="stat-box"><div class="stat-label">🏦 TOTAL DEPOSITS</div><div class="stat-value" id="depositDisplay">0</div></div>
+            <div class="stat-box"><div class="stat-label">👥 REFERRALS</div><div class="stat-value" id="referralDisplay">0</div></div>
+        </div>
+
+        <!-- miner row with countdown -->
+        <div class="miner-row">
+            <div><h3 style="border-left:0; margin:0;">ACTIVATE MINER</h3><button id="activateMinerBtn">⚡ CLAIM 500 GOLD</button></div>
+            <div><span class="timer-box" id="countdownTimer">00:00:00</span></div>
+        </div>
+
+        <!-- referrals + withdrawal -->
+        <div class="two-col">
+            <div class="panel">
+                <h2>🔗 REFERRALS</h2>
+                <div class="ref-link-box">
+                    <span class="ref-link-text" id="referralLinkSpan">generating...</span>
+                    <button class="copy-btn" id="copyRefBtn">📋 COPY</button>
+                </div>
+                <div style="margin-top: 22px; display: flex; justify-content: space-between; font-size: 1.3rem;">
+                    <span>Total referred:</span> <span class="gold-text" id="totalRefValue">0</span>
+                </div>
+                <p style="color:#b59853; margin-top:12px;">✔ each referral adds 50 NGN to deposits & balance</p>
+            </div>
+            <div class="panel">
+                <h2>🏧 WITHDRAWAL</h2>
+                <div class="withdraw-form">
+                    <input type="text" id="bankName" placeholder="Bank Name" value="First Bank">
+                    <input type="text" id="accountNumber" placeholder="Account Number" value="0123456789">
+                    <input type="text" id="accountName" placeholder="Account Name" value="JOHN MINER">
+                    <div class="withdraw-hint">⚠️ Minimum withdrawal: <strong>3000 Gold</strong> (900 NGN)</div>
+                    <button class="process-btn" id="withdrawBtn">PROCESS →</button>
+                    <p id="withdrawFeedback" style="color: #e4b95b; margin-top: 10px;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- leaderboard (fake users) -->
+        <h2>🏆 LEADERBOARD (top 5)</h2>
+        <table class="leaderboard-table">
+            <thead><tr><th>NAME</th><th>GOLD (oz)</th><th>NAIRA (₦)</th></tr></thead>
+            <tbody id="leaderboardBody"></tbody>
+        </table>
+        <div class="footer">✨ secured by local storage ✨</div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ------------------ FAKE FIREBASE / LOCALSTORAGE AUTH ------------------
+        // we use localStorage as "real database" for users & each user data
+        const APP_PREFIX = 'nairaMine_v2_';
+        const MIN_WITHDRAW_GOLD = 3000; // minimum gold required for withdrawal
+        
+        // current logged in user (phone)
+        let currentUser = null; 
+
+        // Helper: load user data, return null if not exist
+        function getUserData(phone) {
+            const key = APP_PREFIX + 'user_' + phone;
+            const data = localStorage.getItem(key);
+            if (!data) return null;
+            return JSON.parse(data);
+        }
+
+        function saveUserData(phone, data) {
+            const key = APP_PREFIX + 'user_' + phone;
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        function getAllUsers() {
+            const users = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX + 'user_')) {
+                    const phone = key.replace(APP_PREFIX + 'user_', '');
+                    const data = JSON.parse(localStorage.getItem(key));
+                    users.push({ phone, ...data });
+                }
+            }
+            return users;
+        }
+
+        // Default new user structure
+        function createDefaultUser(phone) {
+            return {
+                gold: 1000, // starting bonus
+                referralCount: 0,
+                depositNaira: 0,
+                lastClaim: null,
+                refId: 'REF' + Math.floor(100000 + Math.random() * 900000) + phone.slice(-4)
+            };
+        }
+
+        // Register new user
+        function registerUser(phone, password) {
+            if (!phone || !password || password.length !== 8) return false;
+            const existing = getUserData(phone);
+            if (existing) return false; // already exists
+            const userData = createDefaultUser(phone);
+            userData.password = password; // store plain for simplicity (demo)
+            saveUserData(phone, userData);
+            return true;
+        }
+
+        function loginUser(phone, password) {
+            const user = getUserData(phone);
+            if (!user || user.password !== password) return false;
+            return true;
+        }
+
+        // get current user data (after login)
+        function getCurrentUserData() {
+            if (!currentUser) return null;
+            return getUserData(currentUser);
+        }
+
+        function updateCurrentUserData(newData) {
+            if (!currentUser) return;
+            const existing = getUserData(currentUser);
+            if (!existing) return;
+            const merged = { ...existing, ...newData };
+            saveUserData(currentUser, merged);
+        }
+
+        // compute derived values
+        function getNairaFromGold(gold) { return Math.floor(gold * 0.3); }
+        function getTotalNairaBalance(userData) {
+            return getNairaFromGold(userData.gold) + (userData.depositNaira || 0);
+        }
+
+        // render dashboard for current user
+        function refreshUI() {
+            if (!currentUser) return;
+            const user = getCurrentUserData();
+            if (!user) return;
+
+            document.getElementById('goldDisplay').innerText = user.gold;
+            const nairaBal = getTotalNairaBalance(user);
+            document.getElementById('nairaDisplay').innerText = nairaBal;
+            document.getElementById('depositDisplay').innerText = user.depositNaira || 0;
+            document.getElementById('referralDisplay').innerText = user.referralCount;
+            document.getElementById('totalRefValue').innerText = user.referralCount;
+
+            // referral link
+            const refLink = `https://nairamine.com/ref/${user.refId}`;
+            document.getElementById('referralLinkSpan').innerText = refLink;
+
+            // countdown based on lastClaim
+            updateCountdown(user.lastClaim);
+        }
+
+        // countdown logic
+        let countdownInterval = null;
+        function updateCountdown(lastClaimTimestamp) {
+            const timerEl = document.getElementById('countdownTimer');
+            const claimBtn = document.getElementById('activateMinerBtn');
+            if (!timerEl) return;
+
+            if (!lastClaimTimestamp) {
+                timerEl.innerText = '00:00:00';
+                claimBtn.disabled = false;
+                return;
+            }
+
+            const now = Date.now();
+            const twentyFourHours = 24 * 60 * 60 * 1000;
+            const nextClaim = lastClaimTimestamp + twentyFourHours;
+            const diff = nextClaim - now;
+
+            if (diff <= 0) {
+                timerEl.innerText = '00:00:00';
+                claimBtn.disabled = false;
+                return;
+            }
+
+            claimBtn.disabled = true;
+            const hours = Math.floor(diff / (60 * 60 * 1000));
+            const minutes = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
+            const seconds = Math.floor((diff % (60 * 1000)) / 1000);
+            timerEl.innerText = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+        }
+
+        function startCountdownTimer() {
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                if (!currentUser) return;
+                const user = getCurrentUserData();
+                if (user) updateCountdown(user.lastClaim);
+            }, 500);
+        }
+
+        // ----- Mining claim -----
+        function handleMineClaim() {
+            if (!currentUser) return;
+            const user = getCurrentUserData();
+            if (!user) return;
+
+            const now = Date.now();
+            if (user.lastClaim) {
+                const next = user.lastClaim + 86400000;
+                if (now < next) { alert('Please wait for countdown to finish'); return; }
+            }
+
+            // claim 500 gold
+            user.gold += 500;
+            user.lastClaim = now;
+            updateCurrentUserData({ gold: user.gold, lastClaim: user.lastClaim });
+            refreshUI();
+        }
+
+        // ----- Referral simulation (add dummy referral) for demo we add a refer
+        function simulateReferral() {
+            if (!currentUser) return;
+            const user = getCurrentUserData();
+            if (!user) return;
+            user.referralCount = (user.referralCount || 0) + 1;
+            user.depositNaira = (user.depositNaira || 0) + 50; // each referral 50 NGN
+            updateCurrentUserData({ referralCount: user.referralCount, depositNaira: user.depositNaira });
+            refreshUI();
+        }
+
+        // ----- Withdraw (with minimum gold check) -----
+        function processWithdraw() {
+            const bank = document.getElementById('bankName').value;
+            const acc = document.getElementById('accountNumber').value;
+            const name = document.getElementById('accountName').value;
+            const feedback = document.getElementById('withdrawFeedback');
+            
+            if (!bank || !acc || !name) { 
+                feedback.innerText = '❌ Fill all fields'; 
+                return; 
+            }
+            
+            // Get current user gold
+            const user = getCurrentUserData();
+            if (!user) return;
+            
+            // Check minimum withdrawal condition
+            if (user.gold < MIN_WITHDRAW_GOLD) {
+                feedback.innerHTML = `❌ Minimum ${MIN_WITHDRAW_GOLD} gold required. You have ${user.gold} gold.`;
+                return;
+            }
+            
+            // Process withdrawal (mock)
+            feedback.innerHTML = `✅ Withdrawal request for ${user.gold} gold (₦${getNairaFromGold(user.gold)}) sent. (Demo)`;
+            
+            // Optionally we could deduct gold, but for demo we just show message
+        }
+
+        // ----- leaderboard (fake 5 users with high gold) -----
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboardBody');
+            const fake = [
+                { name: '🏅 GoldPrince', gold: 45200 },
+                { name: '⭐ CryptoOga', gold: 38700 },
+                { name: '⚡ AlhajiMine', gold: 27600 },
+                { name: '🔥 OmoGold', gold: 19900 },
+                { name: '💎 LagosMiner', gold: 12400 },
+            ];
+            tbody.innerHTML = '';
+            fake.forEach(f => {
+                const nairaVal = Math.floor(f.gold * 0.3);
+                tbody.innerHTML += `<tr><td>${f.name}</td><td>${f.gold}</td><td>₦${nairaVal}</td></tr>`;
+            });
+        }
+
+        // ----- offline check -----
+        function updateOfflineWarning() {
+            const container = document.getElementById('offlineWarning');
+            if (!navigator.onLine) {
+                container.innerHTML = '<div class="error-banner">⚠️ NO INTERNET CONNECTION - Data may not persist</div>';
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+        // ----- copy referral link -----
+        function copyRefLink() {
+            const link = document.getElementById('referralLinkSpan').innerText;
+            navigator.clipboard.writeText(link).then(() => alert('Copied!')).catch(() => prompt('Copy manually:', link));
+        }
+
+        // ----- Auth UI switching -----
+        const authDiv = document.getElementById('authView');
+        const mainDiv = document.getElementById('mainApp');
+        const loginPanel = document.getElementById('loginPanel');
+        const signupPanel = document.getElementById('signupPanel');
+
+        document.getElementById('goToSignup').addEventListener('click', () => {
+            loginPanel.classList.add('hidden');
+            signupPanel.classList.remove('hidden');
+        });
+        document.getElementById('goToLogin').addEventListener('click', () => {
+            signupPanel.classList.add('hidden');
+            loginPanel.classList.remove('hidden');
+        });
+
+        // login action
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const phone = document.getElementById('loginPhone').value.trim();
+            const pwd = document.getElementById('loginPassword').value.trim();
+            if (!phone || !pwd) { alert('Enter phone and 8-digit password'); return; }
+            if (pwd.length !== 8) { alert('Password must be exactly 8 digits'); return; }
+            if (loginUser(phone, pwd)) {
+                currentUser = phone;
+                authDiv.classList.add('hidden');
+                mainDiv.classList.remove('hidden');
+                refreshUI();
+                startCountdownTimer();
+                renderLeaderboard();
+            } else {
+                alert('Invalid credentials or user not found');
+            }
+        });
+
+        // signup action
+        document.getElementById('signupBtn').addEventListener('click', () => {
+            const phone = document.getElementById('signupPhone').value.trim();
+            const pwd = document.getElementById('signupPassword').value.trim();
+            if (!phone || !pwd) { alert('Fill fields'); return; }
+            if (pwd.length !== 8) { alert('Password must be 8 digits'); return; }
+            const success = registerUser(phone, pwd);
+            if (success) {
+                alert('Account created, please login');
+                // switch to login
+                signupPanel.classList.add('hidden');
+                loginPanel.classList.remove('hidden');
+                document.getElementById('loginPhone').value = phone;
+                document.getElementById('loginPassword').value = '';
+            } else {
+                alert('User already exists');
+            }
+        });
+
+        // logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            currentUser = null;
+            mainDiv.classList.add('hidden');
+            authDiv.classList.remove('hidden');
+            if (countdownInterval) clearInterval(countdownInterval);
+        });
+
+        // Activate miner button
+        document.getElementById('activateMinerBtn').addEventListener('click', handleMineClaim);
+
+        // copy ref
+        document.getElementById('copyRefBtn').addEventListener('click', copyRefLink);
+
+        // withdraw
+        document.getElementById('withdrawBtn').addEventListener('click', processWithdraw);
+
+        // simulate referral addition (double click on "Referrals" heading for demo)
+        document.querySelector('.panel h2').addEventListener('dblclick', function(e) {
+            if (e.target.tagName === 'H2') simulateReferral();
+        });
+
+        // offline listener
+        window.addEventListener('online', updateOfflineWarning);
+        window.addEventListener('offline', updateOfflineWarning);
+        updateOfflineWarning();
+
+        // initial leaderboard render (even if not logged, but will be visible after login)
+        renderLeaderboard();
+
+    })();
+</script>
+</body>
+</html>
